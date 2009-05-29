@@ -20,6 +20,8 @@ require './conf.rb'
 
 output = ""
 
+class KnownException < Exception; end
+
 begin
   require 'sqlite3'
   require 'cgi'
@@ -42,6 +44,15 @@ begin
   end_date = Date.parse(cgi['end_year'] + " " +
                         cgi['end_month'] + " " +
                         cgi['end_day'])
+  if start_date < $first_date || end_date < $first_date
+    raise KnownException, "you specified the date before #{$first_date.strftime('%Y-%m-%d')}."
+  end
+
+  if start_date > end_date
+    tmp = start_date
+    start_date = end_date
+    end_date = tmp
+  end
 
   # Products:
   #  This CGI generates a chart based on the data related to the
@@ -101,15 +112,18 @@ begin
   if type == "pie_by_product"
     sql += "SELECT product, Sum(downloads) AS 'count' FROM #{$tblname} "
     sql += where_conds
-    sql += "GROUP BY product"
+    sql += "GROUP BY product "
+    sql += "ORDER BY product "
   elsif type == "pie_by_language"
     sql += "SELECT language, Sum(downloads) AS 'count' FROM #{$tblname} "
     sql += where_conds
-    sql += "GROUP BY language"
+    sql += "GROUP BY language "
+    sql += "ORDER BY language "
   elsif type == "pie_by_oswa" || type == "pie_by_os"
     sql += "SELECT os, Sum(downloads) AS 'count' FROM #{$tblname} "
     sql += where_conds
-    sql += "GROUP BY os"
+    sql += "GROUP BY os "
+    sql += "ORDER BY os "
   elsif type == "count"
     sql += "SELECT Sum(downloads) as 'count' FROM #{$tblname} "
     sql += where_conds
@@ -152,9 +166,10 @@ begin
       end      
     }
 
-    h.each{ |key,val|
-      fields << key
-      values << val
+    # Show the chart in this order.
+    ["Windows", "Linux", "Mac OS X", "Solaris", "Others"].each{ |os_name|
+      fields << os_name
+      values << h[os_name]
     }
   else
     res.each{ |r|
@@ -188,7 +203,23 @@ begin
       CGI.pretty(html)
     }    
   end
-rescue => exception
+rescue KnownException => exception
+  cgi = CGI.new("html4")
+  cgi.out('charset'=>'utf-8') {
+    html = cgi.html {
+      cgi.head { cgi.title{'ERROR - OpenOffice.org Bouncer statistics'} } +
+      cgi.body {
+        cgi.h1 { "ERROR - OpenOffice.org Bouncer statistics: Query for chart" } +
+        cgi.p {
+          "Your request was invalid because;"
+        } +
+        cgi.p {
+          exception.message
+        }
+      }
+    }
+  }
+rescue => exception # for unknown exception
   ###################################################
   # Printing error message.
   ###################################################
@@ -205,20 +236,19 @@ rescue => exception
           "Error message:"
         } +
         cgi.p {
-          exception.message
+          exception.message.gsub("\n"){"<BR>"}
         } + 
         cgi.h2 {
           "Backtrace:"
         } +
         cgi.p {
-          exception.backtrace
+          exception.backtrace.join("<BR>")
         }
       }
     }
 
     CGI.pretty(html)
   }
-
 else
   print output
 end

@@ -70,13 +70,13 @@ rescue => exception
           "Error message:"
         } +
         cgi.p {
-          exception.message
+          exception.message.gsub("\n"){"<BR>"}
         } + 
         cgi.h2 {
           "Backtrace:"
         } +
         cgi.p {
-          exception.backtrace
+          exception.backtrace.join("<BR>")
         }
       }
     }
