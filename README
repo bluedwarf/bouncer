@@ -1,0 +1,74 @@
+===== DESCRIPTION =====
+
+This is a tiny CGI to generate charts of OpenOffice.org download
+counts. The data was based on bouncer logs uploaded by John McCreesh.
+e.g.) http://marketing.openoffice.org/bouncer/200905.csv
+
+===== LICENSE =====
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+This software includes SVG::Graph library in svg_graph_0.6.1
+directory, which is distributed under GNU General Public License.
+Please also see LICENSE.txt and GPL.txt in the direcotry for the
+detailed license claim of this library.
+
+===== FILES =====
+
+* GPL.txt
+   License file.
+
+* bouncer.db
+   Database which stores download counts.
+
+* conf.rb
+   Common configuration data.
+
+* fetch.rb
+   Download bouncer logs from OpenOffice.org Marketing project and
+   save download counts to database. It takes for several hours
+   for this program to finish.
+
+* update.rb
+   Get latest bouncer logs and update the stored download counts of database.
+   This must be run daily.
+
+* server.rb
+   Webrick server for test of this CGI.
+
+* svg_graph_0.6.1
+   SVG::Graph library (distributed under GPL) to render charts.
+   http://www.germane-software.com/software/SVG/SVG::Graph/
+
+* query_chart.rb (CGI)
+   Query for to make a chart of download statistics.
+
+* chart.rb (CGI)
+   CGI to generate a pie chart according to the request from query_chart.rb.
+
+
+===== TODO =====
+ --- URGENT ---
+ * Error handling.
+ * Writing test case.
+
+ --- IMPORTANT ---
+ * Setting CGI and cron.
+ * Implementation for transition chart.
+ * Faster update.rb.
+ * Loggin CGI request.
+ * Write a document or a help to use this query form.
+
+ --- LATER ---
+ * Fancy query page.
+ * Color themes (need hacks of SVG::Graph library).
