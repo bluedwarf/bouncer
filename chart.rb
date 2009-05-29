@@ -18,19 +18,21 @@
 
 require './conf.rb'
 
-require 'sqlite3'
-require 'cgi'
+output = ""
 
-###################################################
-# Initialization.
-###################################################
-db = SQLite3::Database.new($dbfile)
-cgi = CGI.new("html4")
-
-###################################################
-# Getting arguments and checking the validity.
-###################################################
 begin
+  require 'sqlite3'
+  require 'cgi'
+
+  ###################################################
+  # Initialization.
+  ###################################################
+  db = SQLite3::Database.new($dbfile)
+  cgi = CGI.new("html4")
+
+  ###################################################
+  # Getting arguments and checking the validity.
+  ###################################################
   # Dates:
   #  This CGI generates a chart based on the data generated between
   #  these days.
@@ -38,8 +40,8 @@ begin
                           cgi['start_month'] + " " +
                           cgi['start_day'])
   end_date = Date.parse(cgi['end_year'] + " " +
-                          cgi['end_month'] + " " +
-                          cgi['end_day'])
+                        cgi['end_month'] + " " +
+                        cgi['end_day'])
 
   # Products:
   #  This CGI generates a chart based on the data related to the
@@ -70,107 +72,97 @@ begin
   #  This CGI generates a specified type of chart.
   type = cgi['type']
   raise "Invalid argument for 'type': #{type}"if !$valid_types.include?(type)
-rescue
-  # TODO: Output the error message.
-  exit
-end
 
-###################################################
-# Generating SQL statement.
-###################################################
-where_conds = "WHERE "
+  ###################################################
+  # Generating SQL statement.
+  ###################################################
+  where_conds = "WHERE "
 
-# Conditions for products, languages and oses.
-{ "product" => products,
-  "language" => languages,
-  "os" => oses }.each{ |name, set|
+  # Conditions for products, languages and oses.
+  { "product" => products,
+    "language" => languages,
+    "os" => oses }.each{ |name, set|
 
-  # Note that "set" cannot be empty.
-  # See the part of checking arguments.
-  if set != :all # || set.empty?
-    where_conds += "#{name} IN ("
-    set.each{ |e| where_conds += "'#{e}', " }
-    where_conds[-2] = ")"
-    where_conds += "AND "
+    # Note that "set" cannot be empty.
+    # See the part of checking arguments.
+    if set != :all # || set.empty?
+      where_conds += "#{name} IN ("
+      set.each{ |e| where_conds += "'#{e}', " }
+      where_conds[-2] = ")"
+      where_conds += "AND "
+    end
+  }
+
+  # Conditions for date
+  where_conds += "datejd>=#{start_date.jd} AND datejd<=#{end_date.jd} "
+
+  sql = ""
+
+  if type == "pie_by_product"
+    sql += "SELECT product, Sum(downloads) AS 'count' FROM #{$tblname} "
+    sql += where_conds
+    sql += "GROUP BY product"
+  elsif type == "pie_by_language"
+    sql += "SELECT language, Sum(downloads) AS 'count' FROM #{$tblname} "
+    sql += where_conds
+    sql += "GROUP BY language"
+  elsif type == "pie_by_oswa" || type == "pie_by_os"
+    sql += "SELECT os, Sum(downloads) AS 'count' FROM #{$tblname} "
+    sql += where_conds
+    sql += "GROUP BY os"
+  elsif type == "count"
+    sql += "SELECT Sum(downloads) as 'count' FROM #{$tblname} "
+    sql += where_conds
   end
-}
 
-# Conditions for date
-where_conds += "datejd>=#{start_date.jd} AND datejd<=#{end_date.jd} "
-
-sql = ""
-
-if type == "pie_by_product"
-  sql += "SELECT product, Sum(downloads) AS 'count' FROM #{$tblname} "
-  sql += where_conds
-  sql += "GROUP BY product"
-elsif type == "pie_by_language"
-  sql += "SELECT language, Sum(downloads) AS 'count' FROM #{$tblname} "
-  sql += where_conds
-  sql += "GROUP BY language"
-elsif type == "pie_by_oswa" || type == "pie_by_os"
-  sql += "SELECT os, Sum(downloads) AS 'count' FROM #{$tblname} "
-  sql += where_conds
-  sql += "GROUP BY os"
-elsif type == "count"
-  sql += "SELECT Sum(downloads) as 'count' FROM #{$tblname} "
-  sql += where_conds
-end
-
-###################################################
-# Fetching data from database.
-###################################################
-begin
+  ###################################################
+  # Fetching data from database.
+  ###################################################
   STDERR.puts sql
   res = db.execute(sql)
-rescue
-  # TODO: Output the error message.
-  exit
-end
 
-###################################################
-# Generating a chart.
-###################################################
-fields = []
-values = []
-if type == "count"
-  fields << "count"
-  values << res[0][0].to_i
-elsif type == "pie_by_os"
-  # Group by OS name
-  h = {}
-  res.each{ |r|
-    case r[0]
-    when /^win/
-      h["Windows"] = 0 unless h["Windows"]
-      h["Windows"] += r[1].to_i
-    when /^linux/
-      h["Linux"] = 0 unless h["Linux"]
-      h["Linux"] += r[1].to_i
-    when /^macosx/
-      h["Mac OS X"] = 0 unless h["Mac OS X"]
-      h["Mac OS X"] += r[1].to_i
-    when /^solaris/
-      h["Solaris"] = 0 unless h["Solaris"]
-      h["Solaris"] += r[1].to_i
-    else
-      h["Others"] = 0 unless h["Others"]
-      h["Others"] += r[1].to_i
-    end      
-  }
+  ###################################################
+  # Generating a chart.
+  ###################################################
+  fields = []
+  values = []
+  if type == "count"
+    fields << "count"
+    values << res[0][0].to_i
+  elsif type == "pie_by_os"
+    # Group by OS name
+    h = {}
+    res.each{ |r|
+      case r[0]
+      when /^win/
+        h["Windows"] = 0 unless h["Windows"]
+        h["Windows"] += r[1].to_i
+      when /^linux/
+        h["Linux"] = 0 unless h["Linux"]
+        h["Linux"] += r[1].to_i
+      when /^macosx/
+        h["Mac OS X"] = 0 unless h["Mac OS X"]
+        h["Mac OS X"] += r[1].to_i
+      when /^solaris/
+        h["Solaris"] = 0 unless h["Solaris"]
+        h["Solaris"] += r[1].to_i
+      else
+        h["Others"] = 0 unless h["Others"]
+        h["Others"] += r[1].to_i
+      end      
+    }
 
-  h.each{ |key,val|
-    fields << key
-    values << val
-  }
-else
-  res.each{ |r|
-    fields << r[0]
-    values << r[1].to_i
-  }
-end
+    h.each{ |key,val|
+      fields << key
+      values << val
+    }
+  else
+    res.each{ |r|
+      fields << r[0]
+      values << r[1].to_i
+    }
+  end
 
-begin
   if type =~ /^pie/
     require 'SVG/Graph/Pie'
     graph = SVG::Graph::Pie.new({ :height => 500,
@@ -182,10 +174,10 @@ begin
     graph.add_data({ :data => values,
                      :title => 'Bouncer Statistics'})
 
-    print "Content-type: image/svg+xml\r\n\r\n"
-    print graph.burn()
+    output << "Content-type: image/svg+xml\r\n\r\n"
+    output << graph.burn()
   else type == "count"
-    cgi.out('charset'=>'utf-8') {
+    output = cgi.out('charset'=>'utf-8') {
       html = cgi.html { 
         cgi.head { cgi.title{'OpenOffice.org Bouncer statistics'} } +
         cgi.body { 
@@ -196,7 +188,37 @@ begin
       CGI.pretty(html)
     }    
   end
-rescue
-  # TODO: Output the error message.
-  exit
+rescue => exception
+  ###################################################
+  # Printing error message.
+  ###################################################
+  cgi = CGI.new("html4")
+  cgi.out('charset'=>'utf-8') {
+    html = cgi.html {
+      cgi.head { cgi.title{'ERROR - OpenOffice.org Bouncer statistics'} } +
+      cgi.body {
+        cgi.h1 { "ERROR - OpenOffice.org Bouncer statistics: Query for chart" } +
+        cgi.p {
+          "This CGI crashed for some reason. Please send the following error message to #$contact:"
+        } +
+        cgi.h2 {
+          "Error message:"
+        } +
+        cgi.p {
+          exception.message
+        } + 
+        cgi.h2 {
+          "Backtrace:"
+        } +
+        cgi.p {
+          exception.backtrace
+        }
+      }
+    }
+
+    CGI.pretty(html)
+  }
+
+else
+  print output
 end
