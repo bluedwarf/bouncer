@@ -100,6 +100,11 @@ begin
       a.to_s
     end
   }
+
+  type_values = []
+  $valid_types.each_index{ |index|
+    type_values << [$valid_types[index], $name_types[index]]
+  }
 rescue => exception
   ###################################################
   # Printing error message.
@@ -190,7 +195,7 @@ else
           cgi.p {
             "Chart type: " +
             cgi.scrolling_list({"NAME" => "type",
-                                 "VALUES" => $valid_types})
+                                 "VALUES" => type_values})
           } +
           cgi.p { 
             cgi.submit("Show")

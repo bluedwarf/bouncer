@@ -3,6 +3,12 @@ $tblname = 'bouncer'
 $contact = 'bluedwarf@openoffice.org'
 $charset = 'utf-8'
 
+$name_types = ["Pie chart (by product)",
+               "Pie chart (by language)",
+               "Pie chart (by OS and architecture)",
+               "Pie chart (by OS)",
+               "Download counter"]
+
 $valid_types = ["pie_by_product",
                 "pie_by_language",
                 "pie_by_oswa", # Pie chart by OS with architecture name
