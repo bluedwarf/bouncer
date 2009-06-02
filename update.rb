@@ -22,6 +22,7 @@ require 'sqlite3'
 require 'open-uri'
 
 db = SQLite3::Database.new($dbfile)
+sqls = []
 
 base_url = "http://marketing.openoffice.org/bouncer/"
 extension = ".csv"
@@ -40,12 +41,16 @@ months.each{ |month|
       res = db.execute(sql)
 
       if res.empty?
-        sql = "INSERT INTO #{$tblname} VALUES ('#{date_jd}', '#{product}', '#{os}', '#{language}', #{downloads.to_i})"
-#        db.execute(sql)
-
-        puts "Registered: #{line}"
+        sqls << "INSERT INTO #{$tblname} VALUES ('#{date_jd}', '#{product}', '#{os}', '#{language}', #{downloads.to_i})"
       end
     }
+  }
+}
+
+db.transaction{
+  sqls.each{ |sql|
+    db.execute(sql)
+    puts sql
   }
 }
 
