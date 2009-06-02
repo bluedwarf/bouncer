@@ -28,7 +28,7 @@ begin
   ###################################################
   months = 
     ["January", "February", "March", "April", "May", "June", "July",
-     "August", "September", "Octoboer", "November", "December"]
+     "August", "September", "October", "November", "December"]
 
   ###################################################
   # Initialization.
