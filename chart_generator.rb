@@ -42,12 +42,12 @@ class ChartGenerator
     # Dates:
     #  This CGI generates a chart based on the data generated between
     #  these days.
-    @start_date = Date.parse(@cgi['start_year'] + " " +
-                             @cgi['start_month'] + " " +
-                             @cgi['start_day'])
-    @end_date = Date.parse(@cgi['end_year'] + " " +
-                           @cgi['end_month'] + " " +
-                           @cgi['end_day'])
+    @start_date = Date.new(@cgi['start_year'].to_i,
+                           @cgi['start_month'].to_i,
+                           @cgi['start_day'].to_i)
+    @end_date = Date.new(@cgi['end_year'].to_i,
+                         @cgi['end_month'].to_i,
+                         @cgi['end_day'].to_i)
 
     if @start_date > @end_date
       tmp = @start_date

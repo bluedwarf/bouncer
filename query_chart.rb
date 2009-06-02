@@ -70,9 +70,13 @@ begin
     end
   }
 
-  start_months = months.clone
-  start_months[start_date.month - 1] = [start_months[start_date.month - 1],
-                                        true]
+  start_months = (1..12).to_a.map{ |i|
+    if start_date.month == i
+      [i.to_s, months[i-1], true]
+    else
+      [i.to_s, months[i-1]]
+    end
+  }
 
   start_years = ((start_date.year)..(end_date.year)).to_a.map{ |a|
     if a == start_date.year
@@ -90,8 +94,13 @@ begin
     end
   }
 
-  end_months = months.clone
-  end_months[end_date.month - 1] = [end_months[end_date.month - 1], true]
+  end_months = (1..12).to_a.map{ |i|
+    if end_date.month == i
+      [i.to_s, months[i-1], true]
+    else
+      [i.to_s, months[i-1]]
+    end
+  }
 
   end_years = ((start_date.year)..(end_date.year)).to_a.map{ |a|
     if a == end_date.year
