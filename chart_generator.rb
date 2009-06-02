@@ -48,15 +48,25 @@ class ChartGenerator
     @end_date = Date.parse(@cgi['end_year'] + " " +
                            @cgi['end_month'] + " " +
                            @cgi['end_day'])
-    if @start_date < $first_date || @end_date < $first_date
-      raise KnownException,
-      "you specified the date before #{$first_date.strftime('%Y-%m-%d')}."
-    end
 
     if @start_date > @end_date
       tmp = @start_date
       @start_date = @end_date
       @end_date = tmp
+    end
+
+    res = @db.execute("SELECT MIN(datejd) FROM #{$tblname}")
+    first_date = Date.jd(res[0][0].to_i)
+
+    res = @db.execute("SELECT MAX(datejd) FROM #{$tblname}")
+    last_date = Date.jd(res[0][0].to_i)
+
+    if @start_date < first_date
+      raise KnownException,
+      "you specified the date before #{first_date.strftime('%Y-%m-%d')}."
+    elsif @end_date > last_date
+      raise KnownException,
+      "you specified the date after #{last_date.strftime('%Y-%m-%d')}."
     end
 
     # Products:

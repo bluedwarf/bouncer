@@ -26,10 +26,9 @@ begin
   ###################################################
   # Data section.
   ###################################################
-  days = (1..31).to_a.map!{|a| a.to_s}
-  months = ["January", "February", "March", "April", "May", "June", "July",
-            "August", "September", "Octoboer", "November", "December"]
-  years = (2008..2015).to_a.map!{|a| a.to_s}
+  months = 
+    ["January", "February", "March", "April", "May", "June", "July",
+     "August", "September", "Octoboer", "November", "December"]
 
   ###################################################
   # Initialization.
@@ -45,6 +44,12 @@ begin
   ###################################################
   # Obtaining the valid values from database
   ###################################################
+  res = db.execute("SELECT MIN(datejd) FROM #{$tblname}")
+  start_date = Date.jd(res[0][0].to_i)
+
+  res = db.execute("SELECT MAX(datejd) FROM #{$tblname}")
+  end_date = Date.jd(res[0][0].to_i)
+
   db.execute("SELECT DISTINCT product FROM #{$tblname}"){ |r| products << r }
   products.sort!
 
@@ -53,6 +58,48 @@ begin
 
   db.execute("SELECT DISTINCT language FROM #{$tblname}"){ |r| languages << r }
   languages.sort!
+
+  ###################################################
+  # Set default values for query form
+  ###################################################
+  start_days = (1..31).to_a.map{ |a|
+    if a == start_date.day
+      [a.to_s, true]
+    else
+      a.to_s
+    end
+  }
+
+  start_months = months.clone
+  start_months[start_date.month - 1] = [start_months[start_date.month - 1],
+                                        true]
+
+  start_years = ((start_date.year)..(end_date.year)).to_a.map{ |a|
+    if a == start_date.year
+      [a.to_s, true]
+    else
+      a.to_s
+    end
+  }
+
+  end_days = (1..31).to_a.map{ |a|
+    if a == end_date.day
+      [a.to_s, true]
+    else
+      a.to_s
+    end
+  }
+
+  end_months = months.clone
+  end_months[end_date.month - 1] = [end_months[end_date.month - 1], true]
+
+  end_years = ((start_date.year)..(end_date.year)).to_a.map{ |a|
+    if a == end_date.year
+      [a.to_s, true]
+    else
+      a.to_s
+    end
+  }
 rescue => exception
   ###################################################
   # Printing error message.
@@ -98,20 +145,20 @@ else
           cgi.p {
             "From: " +
             cgi.scrolling_list({"NAME" => "start_day",
-                                 "VALUES" => days}) +
+                                 "VALUES" => start_days}) +
             cgi.scrolling_list({"NAME" => "start_month",
-                                 "VALUES" => months}) +
+                                 "VALUES" => start_months}) +
             cgi.scrolling_list({"NAME" => "start_year",
-                                 "VALUES" => years})
+                                 "VALUES" => start_years})
           } +
           cgi.p {
             "To: " +
             cgi.scrolling_list({"NAME" => "end_day",
-                                 "VALUES" => days}) +
+                                 "VALUES" => end_days}) +
             cgi.scrolling_list({"NAME" => "end_month",
-                                 "VALUES" => months}) +
+                                 "VALUES" => end_months}) +
             cgi.scrolling_list({"NAME" => "end_year",
-                                 "VALUES" => years})
+                                 "VALUES" => end_years})
           } +
           cgi.p {
           } +
