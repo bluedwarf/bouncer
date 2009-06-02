@@ -58,7 +58,7 @@ rescue => exception
   # Printing error message.
   ###################################################
   cgi = CGI.new("html4")
-  cgi.out('charset'=>'utf-8') {
+  cgi.out('charset'=>$charset) {
     html = cgi.html {
       cgi.head { cgi.title{'ERROR - OpenOffice.org Bouncer statistics'} } +
       cgi.body {
@@ -89,7 +89,7 @@ else
   # Printing query form.
   ###################################################
   cgi = CGI.new("html4")
-  cgi.out('charset'=>'utf-8') {
+  cgi.out('charset'=>$charset) {
     html = cgi.html { 
       cgi.head { cgi.title{'OpenOffice.org Bouncer statistics'} } +
       cgi.body { 

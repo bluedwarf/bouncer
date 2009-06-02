@@ -1,6 +1,7 @@
 $dbfile = 'bouncer.db'
 $tblname = 'bouncer'
 $contact = 'bluedwarf@openoffice.org'
+$charset = 'utf-8'
 
 $valid_types = ["pie_by_product",
                 "pie_by_language",
