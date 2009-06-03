@@ -65,8 +65,9 @@ detailed license claim of this library.
  * Setting CGI and cron.
  * Implementation for transition chart.
  * Faster update.rb.
- * Loggin CGI request.
+ * Logging CGI request.
  * Write a document or a help to use this query form.
+ * Add more colours (need hacks of SVG::Graph library).
 
  --- LATER ---
  * Fancy query page.

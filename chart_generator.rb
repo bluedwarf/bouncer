@@ -143,6 +143,21 @@ class ChartGenerator
       sql += where_conds
       sql += "GROUP BY os "
       sql += "ORDER BY os "
+    elsif @type == "line_by_product"
+      sql += "SELECT datejd, product, Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY datejd, product "
+      sql += "ORDER BY product, datejd ASC "
+    elsif @type == "line_by_language"
+      sql += "SELECT datejd, language, Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY datejd, language "
+      sql += "ORDER BY language, datejd ASC "
+    elsif @type == "line_by_oswa" || @type == "line_by_os"
+      sql += "SELECT datejd, os, Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY datejd, os "
+      sql += "ORDER BY os, datejd ASC "
     elsif @type == "count"
       sql += "SELECT Sum(downloads) as 'count' FROM #{@tbl} "
       sql += where_conds
@@ -167,71 +182,110 @@ class ChartGenerator
     res = select(sql_statement)
 
     output = ""
-    fields = []
-    values = []
 
     if @type == "count"
-      fields << "count"
-      values << res[0][0].to_i
-    elsif @type == "pie_by_os"
-      # Group by OS name
-      h = {}
-      res.each{ |r|
-        case r[0]
-        when /^win/
-          h["Windows"] = 0 unless h["Windows"]
-          h["Windows"] += r[1].to_i
-        when /^linux/
-          h["Linux"] = 0 unless h["Linux"]
-          h["Linux"] += r[1].to_i
-        when /^macosx/
-          h["Mac OS X"] = 0 unless h["Mac OS X"]
-          h["Mac OS X"] += r[1].to_i
-        when /^solaris/
-          h["Solaris"] = 0 unless h["Solaris"]
-          h["Solaris"] += r[1].to_i
-        else
-          h["Others"] = 0 unless h["Others"]
-          h["Others"] += r[1].to_i
-        end      
-      }
+      output = @cgi.out('charset'=>$charset) {
+        html = @cgi.html { 
+          @cgi.head { @cgi.title{'OpenOffice.org Bouncer statistics'} } +
+          @cgi.body { 
+            res[0][0].to_i
+          }
+        }
 
-      # Show the chart in this order.
-      ["Windows", "Linux", "Mac OS X", "Solaris", "Others"].each{ |os_name|
-        fields << os_name
-        values << h[os_name]
+        CGI.pretty(html)
       }
-    else
-      res.each{ |r|
-        fields << r[0]
-        values << r[1].to_i
-      }
-    end
+    elsif @type =~ /^pie/
+      fields = []
+      values = []
 
-    if @type =~ /^pie/
+      if @type == "pie_by_os" # Special manipulation for this type of chart.
+        # Group by OS name
+        h = {}
+        res.each{ |r|
+          case r[0]
+          when /^win/
+            h["Windows"] = 0 unless h["Windows"]
+            h["Windows"] += r[1].to_i
+          when /^linux/
+            h["Linux"] = 0 unless h["Linux"]
+            h["Linux"] += r[1].to_i
+          when /^macosx/
+            h["Mac OS X"] = 0 unless h["Mac OS X"]
+            h["Mac OS X"] += r[1].to_i
+          when /^solaris/
+            h["Solaris"] = 0 unless h["Solaris"]
+            h["Solaris"] += r[1].to_i
+          else
+            h["Others"] = 0 unless h["Others"]
+            h["Others"] += r[1].to_i
+          end      
+        }
+
+        # Show the chart in this order.
+        ["Windows", "Linux", "Mac OS X", "Solaris", "Others"].each{ |os_name|
+          fields << os_name
+          values << h[os_name]
+        }
+      else
+        res.each{ |r|
+          fields << r[0]
+          values << r[1].to_i
+        }
+      end
+
+      # Generate SVG chart
       require 'SVG/Graph/Pie'
       graph = SVG::Graph::Pie.new({ :height => 500,
                                     :width => 900,
-                                    :fields => fields,})
-      graph.show_percent = true
-      graph.show_key_percent = true
+                                    :fields => fields,
+                                    :scale_x_integers => true,
+                                    :min_x_value => 0,
+                                    :min_y_value => 0,
+                                    :show_data_labels => false,
+                                    :x_title => "Date",
+                                    :show_x_title => true,
+                                    :y_title => "Download counts a day",
+                                    :show_y_title => true, })
+      graph.min_x_value = 0
+      graph.min_y_value = 0
 
       graph.add_data({ :data => values,
                        :title => 'Bouncer Statistics'})
 
       output << "Content-type: image/svg+xml\r\n\r\n"
       output << graph.burn()
-    else @type == "count"
-      output = @cgi.out('charset'=>$charset) {
-        html = @cgi.html { 
-          @cgi.head { @cgi.title{'OpenOffice.org Bouncer statistics'} } +
-          @cgi.body { 
-            values[0]
-          }
-        }
+    elsif @type =~ /^line/
+      fields = []
+      date = @start_date
+      while date <= @end_date
+        fields << date.strftime("%Y/%m/%d")
+        date += 1
+      end
 
-        CGI.pretty(html)
-      }    
+      lines = {}
+      res.each{ |r|
+        lines[r[1]] = Array.new(fields.size, 0) if lines[r[1]] == nil
+
+        date = Date.jd(r[0].to_i)
+        i = date - @start_date
+        lines[r[1]][i] = r[2].to_i
+      }
+
+      require 'SVG/Graph/Line'
+      graph = SVG::Graph::Line.new({ :height => 500,
+                                     :width => 850,
+                                     :fields => fields,
+                                     :min_scale_value => 0,
+                                     :show_data_values => false, })
+
+      lines.each{ |title,data|
+        graph.add_data({ :data => data,
+                         :title => title })
+      }
+      output << "Content-type: image/svg+xml\r\n\r\n"
+      output << graph.burn()
+    else
+      raise KnownException, "Invalid argument for 'type': #{@type}"
     end
 
     output

@@ -7,12 +7,20 @@ $name_types = ["Pie chart (by product)",
                "Pie chart (by language)",
                "Pie chart (by OS and architecture)",
                "Pie chart (by OS)",
+               "Line chart (by product)",
+               "Line chart (by language)",
+               "Line chart (by OS and architecture)",
+               "Line chart (by OS)",
                "Download counter"]
 
 $valid_types = ["pie_by_product",
                 "pie_by_language",
                 "pie_by_oswa", # Pie chart by OS with architecture name
-                "pie_by_os", # Pie chart by just OS name like "Windows"
+                "pie_by_os", # Pie chart by OS names like "Windows"
+                "line_by_product",
+                "line_by_language",
+                "line_by_oswa", # Line chart by OS with architecture name
+                "line_by_os", # Line chart by OS names like "Windows"
                 "count"]
 
 require 'date'
