@@ -255,28 +255,42 @@ class ChartGenerator
       output << "Content-type: image/svg+xml\r\n\r\n"
       output << graph.burn()
     elsif @type =~ /^line/
+      # set x label
       fields = []
       date = @start_date
+      interval = ((@end_date - @start_date) / 10).round
       while date <= @end_date
-        fields << date.strftime("%Y/%m/%d")
+        if (date - @start_date) % interval == 0 
+          fields << date.strftime("%Y/%m/%d")
+        else
+          fields << ""
+        end
         date += 1
       end
 
+      # set data
       lines = {}
+      max_value = 0
       res.each{ |r|
         lines[r[1]] = Array.new(fields.size, 0) if lines[r[1]] == nil
 
         date = Date.jd(r[0].to_i)
         i = date - @start_date
         lines[r[1]][i] = r[2].to_i
+
+        max_value = r[2].to_i if r[2].to_i > max_value
       }
+
+      # TODO: change the scale (might be needed to change SVG::Graph library)
 
       require 'SVG/Graph/Line'
       graph = SVG::Graph::Line.new({ :height => 500,
                                      :width => 850,
                                      :fields => fields,
                                      :min_scale_value => 0,
-                                     :show_data_values => false, })
+                                     :show_data_values => false, 
+                                     :scale_integers => true, })
+
 
       lines.each{ |title,data|
         graph.add_data({ :data => data,
