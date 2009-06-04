@@ -223,14 +223,20 @@ class ChartGenerator
 
         # Show the chart in this order.
         ["Windows", "Linux", "Mac OS X", "Solaris", "Others"].each{ |os_name|
-          fields << os_name
-          values << h[os_name]
+          if h[os_name]
+            fields << os_name
+            values << h[os_name]
+          end
         }
       else
         res.each{ |r|
           fields << r[0]
           values << r[1].to_i
         }
+      end
+
+      if fields.size == 0
+        raise KnownException, "No download data in the condition you specified."
       end
 
       # Generate SVG chart
@@ -294,6 +300,10 @@ class ChartGenerator
         }
       end
 
+      if lines.size == 0
+        raise KnownException, "No download data in the condition you specified."
+      end
+
       require 'SVG/Graph/Line'
       graph = SVG::Graph::Line.new({ :height => 500,
                                      :width => 900,
@@ -308,8 +318,6 @@ class ChartGenerator
                                      :y_title_font_size => 18,
                                      :show_y_title => true, 
                                      :rotate_x_labels => true, })
-
-
 
       lines.each{ |title,data|
         graph.add_data({ :data => data,
