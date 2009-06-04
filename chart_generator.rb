@@ -237,17 +237,7 @@ class ChartGenerator
       require 'SVG/Graph/Pie'
       graph = SVG::Graph::Pie.new({ :height => 500,
                                     :width => 900,
-                                    :fields => fields,
-                                    :scale_x_integers => true,
-                                    :min_x_value => 0,
-                                    :min_y_value => 0,
-                                    :show_data_labels => false,
-                                    :x_title => "Date",
-                                    :show_x_title => true,
-                                    :y_title => "Download counts a day",
-                                    :show_y_title => true, })
-      graph.min_x_value = 0
-      graph.min_y_value = 0
+                                    :fields => fields, })
 
       graph.add_data({ :data => values,
                        :title => 'Bouncer Statistics'})
@@ -306,11 +296,18 @@ class ChartGenerator
 
       require 'SVG/Graph/Line'
       graph = SVG::Graph::Line.new({ :height => 500,
-                                     :width => 850,
+                                     :width => 900,
                                      :fields => fields,
                                      :min_scale_value => 0,
                                      :show_data_values => false, 
-                                     :scale_integers => true, })
+                                     :scale_integers => true,
+                                     :min_x_value => 0,
+                                     :min_y_value => 0,
+                                     :x_title => "Date",
+                                     :show_x_title => true,
+                                     :y_title => "Download counts a day",
+                                     :show_y_title => true, })
+
 
 
       lines.each{ |title,data|
