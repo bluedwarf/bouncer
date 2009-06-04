@@ -276,7 +276,7 @@ module SVG
                      [255, 149, 14],
                      [197, 0, 11]] # in RGB
 
-        @config[:fields].each_index{ |i|
+        @data.each_index{ |i|
           j = i % color_set.size
           r = color_set[j][0].to_s(16)
           g = color_set[j][1].to_s(16)
