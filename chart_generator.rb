@@ -218,7 +218,7 @@ class ChartGenerator
           else
             h["Others"] = 0 unless h["Others"]
             h["Others"] += r[1].to_i
-          end      
+          end
         }
 
         # Show the chart in this order.
@@ -270,18 +270,39 @@ class ChartGenerator
 
       # set data
       lines = {}
-      max_value = 0
-      res.each{ |r|
-        lines[r[1]] = Array.new(fields.size, 0) if lines[r[1]] == nil
 
-        date = Date.jd(r[0].to_i)
-        i = date - @start_date
-        lines[r[1]][i] = r[2].to_i
+      if @type == "line_by_os"
+        res.each{ |r|
+          date = Date.jd(r[0].to_i)
+          i = date - @start_date
 
-        max_value = r[2].to_i if r[2].to_i > max_value
-      }
+          case r[1]
+          when /^win/
+            lines["Windows"] = Array.new(fields.size, 0) unless lines["Windows"]
+            lines["Windows"][i] += r[2].to_i
+          when /^linux/
+            lines["Linux"] = Array.new(fields.size, 0) unless lines["Linux"]
+            lines["Linux"][i] += r[2].to_i
+          when /^macosx/
+            lines["Mac OS X"] = Array.new(fields.size, 0) unless lines["Mac OS X"]
+            lines["Mac OS X"][i] += r[2].to_i
+          when /^solaris/
+            lines["Solaris"] = Array.new(fields.size, 0) unless lines["Solaris"]
+            lines["Solaris"][i] += r[2].to_i
+          else
+            lines["Others"] = Array.new(fields.size, 0) unless lines["Others"]
+            lines["Others"][i] += r[2].to_i
+          end
+        }
+      else
+        res.each{ |r|
+          lines[r[1]] = Array.new(fields.size, 0) if lines[r[1]] == nil
 
-      # TODO: change the scale (might be needed to change SVG::Graph library)
+          date = Date.jd(r[0].to_i)
+          i = date - @start_date
+          lines[r[1]][i] = r[2].to_i
+        }
+      end
 
       require 'SVG/Graph/Line'
       graph = SVG::Graph::Line.new({ :height => 500,
