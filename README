@@ -75,11 +75,8 @@ version 3 of the License, or (at your option) any later version.
 
  --- IMPORTANT ---
  * Setting CGI and cron.
- * Implementation for transition chart.
  * Faster update.rb.
- * Logging CGI request.
  * Write a document or a help to use this query form.
- * Add more colours (need hacks of SVG::Graph library).
 
  --- LATER ---
  * Fancy query page.
