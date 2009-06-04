@@ -306,7 +306,10 @@ module SVG
 
 
       def get_css
-        return <<EOL
+        # This methods was modified by Takashi Nakamoto
+        # <bluedwarf@bpost.plala.or.jp>
+
+        css = <<EOL
 .dataPointLabel{
 	fill: #000000;
 	text-anchor:middle;
@@ -314,81 +317,41 @@ module SVG
 	font-family: "Arial", sans-serif;
 	font-weight: normal;
 }
+EOL
 
-/* key - MUST match fill styles */
-.key1,.fill1{
-	fill: #ff0000;
+        color_set = [[0, 69, 134],
+                     [255, 66, 14],
+                     [255, 211, 32],
+                     [87, 157, 28],
+                     [126, 0, 33],
+                     [131, 202, 255],
+                     [49, 64, 4],
+                     [174, 207, 0],
+                     [75, 31, 111],
+                     [255, 149, 14],
+                     [197, 0, 11]] # in RGB
+
+        @config[:fields].each_index{ |i|
+          j = i % color_set.size
+          r = color_set[j][0].to_s(16)
+          g = color_set[j][1].to_s(16)
+          b = color_set[j][2].to_s(16)
+
+          r = "0" + r if r.size == 1
+          g = "0" + g if g.size == 1
+          b = "0" + b if b.size == 1
+
+          css << <<EOL
+.key#{i+1},.fill#{i+1}{
+	fill: \##{r}#{g}#{b};
 	fill-opacity: 0.7;
 	stroke: none;
-	stroke-width: 1px;	
-}
-.key2,.fill2{
-	fill: #0000ff;
-	fill-opacity: 0.7;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key3,.fill3{
-	fill-opacity: 0.7;
-	fill: #00ff00;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key4,.fill4{
-	fill-opacity: 0.7;
-	fill: #ffcc00;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key5,.fill5{
-	fill-opacity: 0.7;
-	fill: #00ccff;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key6,.fill6{
-	fill-opacity: 0.7;
-	fill: #ff00ff;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key7,.fill7{
-	fill-opacity: 0.7;
-	fill: #00ff99;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key8,.fill8{
-	fill-opacity: 0.7;
-	fill: #ffff00;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key9,.fill9{
-	fill-opacity: 0.7;
-	fill: #cc6666;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key10,.fill10{
-	fill-opacity: 0.7;
-	fill: #663399;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key11,.fill11{
-	fill-opacity: 0.7;
-	fill: #339900;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key12,.fill12{
-	fill-opacity: 0.7;
-	fill: #9966FF;
-	stroke: none;
-	stroke-width: 1px;	
+	stroke-width: 1px;
 }
 EOL
+        }
+
+        return css
       end
     end
   end

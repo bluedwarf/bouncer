@@ -1,3 +1,6 @@
+# This file contains some modification made by
+# Takashi Nakamoto <bluedwarf@bpost.plala.or.jp>
+
 begin
   require 'zlib'
   @@__have_zlib = true
@@ -550,8 +553,8 @@ module SVG
               text.attributes["y"] = y.to_s
               if rotate_x_labels
                 text.attributes["transform"] = 
-                  "rotate( 90 #{x} #{y-x_label_font_size} )"+
-                  " translate( 0 -#{x_label_font_size/4} )"
+                  "rotate( -90 #{x} #{y-x_label_font_size} )"+
+                  " translate( -50 -#{x_label_font_size/2} )"
                 text.attributes["style"] = "text-anchor: start"
               else
                 text.attributes["style"] = "text-anchor: middle"
@@ -932,18 +935,18 @@ module SVG
 
 .xAxisTitle{
   text-anchor: middle;
-  fill: #ff0000;
+  fill: #000000;
   font-size: #{x_title_font_size}px;
   font-family: "Arial", sans-serif;
-  font-weight: normal;
+  font-weight: bold;
 }
 
 .yAxisTitle{
-  fill: #ff0000;
+  fill: #000000;
   text-anchor: middle;
   font-size: #{y_title_font_size}px;
   font-family: "Arial", sans-serif;
-  font-weight: normal;
+  font-weight: bold;
 }
 
 .dataPointLabel{

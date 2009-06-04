@@ -151,6 +151,8 @@ module SVG
         @border_left = label_left if label_left > @border_left
       end
 
+      # This methods was modified by Takashi Nakamoto
+      # <bluedwarf@bpost.plala.or.jp>
       def get_y_labels
         maxvalue = max_value
         minvalue = min_value
@@ -162,6 +164,10 @@ module SVG
 
         if scale_integers
           scale_division = scale_division < 1 ? 1 : scale_division.round
+
+          digit = scale_division.to_s.size
+          i = scale_division.to_s[0..0].to_i
+          scale_division = i*(10**(digit-1))
         end
 
         rv = []
@@ -253,191 +259,53 @@ module SVG
 
 
       def get_css
-        return <<EOL
-/* default line styles */
-.line1{
+        # This methods was modified by Takashi Nakamoto
+        # <bluedwarf@bpost.plala.or.jp>
+
+        css = ""
+
+        color_set = [[0, 69, 134],
+                     [255, 66, 14],
+                     [255, 211, 32],
+                     [87, 157, 28],
+                     [126, 0, 33],
+                     [131, 202, 255],
+                     [49, 64, 4],
+                     [174, 207, 0],
+                     [75, 31, 111],
+                     [255, 149, 14],
+                     [197, 0, 11]] # in RGB
+
+        @config[:fields].each_index{ |i|
+          j = i % color_set.size
+          r = color_set[j][0].to_s(16)
+          g = color_set[j][1].to_s(16)
+          b = color_set[j][2].to_s(16)
+
+          r = "0" + r if r.size == 1
+          g = "0" + g if g.size == 1
+          b = "0" + b if b.size == 1
+
+          css << <<EOL
+.line#{i+1}{
 	fill: none;
-	stroke: #ff0000;
-	stroke-width: 1px;	
+	stroke: \##{r}#{g}#{b};
+	stroke-width: 1px;
 }
-.line2{
-	fill: none;
-	stroke: #0000ff;
-	stroke-width: 1px;	
-}
-.line3{
-	fill: none;
-	stroke: #00ff00;
-	stroke-width: 1px;	
-}
-.line4{
-	fill: none;
-	stroke: #ffcc00;
-	stroke-width: 1px;	
-}
-.line5{
-	fill: none;
-	stroke: #00ccff;
-	stroke-width: 1px;	
-}
-.line6{
-	fill: none;
-	stroke: #ff00ff;
-	stroke-width: 1px;	
-}
-.line7{
-	fill: none;
-	stroke: #00ffff;
-	stroke-width: 1px;	
-}
-.line8{
-	fill: none;
-	stroke: #ffff00;
-	stroke-width: 1px;	
-}
-.line9{
-	fill: none;
-	stroke: #ccc6666;
-	stroke-width: 1px;	
-}
-.line10{
-	fill: none;
-	stroke: #663399;
-	stroke-width: 1px;	
-}
-.line11{
-	fill: none;
-	stroke: #339900;
-	stroke-width: 1px;	
-}
-.line12{
-	fill: none;
-	stroke: #9966FF;
-	stroke-width: 1px;	
-}
-/* default fill styles */
-.fill1{
-	fill: #cc0000;
+.fill#{i+1}{
+	fill: \##{r}#{g}#{b};
 	fill-opacity: 0.2;
 	stroke: none;
 }
-.fill2{
-	fill: #0000cc;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill3{
-	fill: #00cc00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill4{
-	fill: #ffcc00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill5{
-	fill: #00ccff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill6{
-	fill: #ff00ff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill7{
-	fill: #00ffff;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill8{
-	fill: #ffff00;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill9{
-	fill: #cc6666;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill10{
-	fill: #663399;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill11{
-	fill: #339900;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-.fill12{
-	fill: #9966FF;
-	fill-opacity: 0.2;
-	stroke: none;
-}
-/* default line styles */
-.key1,.dataPoint1{
-	fill: #ff0000;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key2,.dataPoint2{
-	fill: #0000ff;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key3,.dataPoint3{
-	fill: #00ff00;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key4,.dataPoint4{
-	fill: #ffcc00;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key5,.dataPoint5{
-	fill: #00ccff;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key6,.dataPoint6{
-	fill: #ff00ff;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key7,.dataPoint7{
-	fill: #00ffff;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key8,.dataPoint8{
-	fill: #ffff00;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key9,.dataPoint9{
-	fill: #cc6666;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key10,.dataPoint10{
-	fill: #663399;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key11,.dataPoint11{
-	fill: #339900;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key12,.dataPoint12{
-	fill: #9966FF;
+.key#{i+1},.dataPoint#{i+1}{
+	fill: \##{r}#{g}#{b};
 	stroke: none;
 	stroke-width: 1px;	
 }
 EOL
+        }
+
+        return css
       end
     end
   end

@@ -248,10 +248,10 @@ class ChartGenerator
       # set x label
       fields = []
       date = @start_date
-      interval = ((@end_date - @start_date) / 10).round
+      interval = ((@end_date - @start_date) / 20).round
       while date <= @end_date
         if (date - @start_date) % interval == 0 
-          fields << date.strftime("%Y/%m/%d")
+          fields << date.strftime("%y/%m/%d")
         else
           fields << ""
         end
@@ -303,10 +303,11 @@ class ChartGenerator
                                      :scale_integers => true,
                                      :min_x_value => 0,
                                      :min_y_value => 0,
-                                     :x_title => "Date",
-                                     :show_x_title => true,
-                                     :y_title => "Download counts a day",
-                                     :show_y_title => true, })
+                                     :show_x_title => false,
+                                     :y_title => "D/L a day",
+                                     :y_title_font_size => 18,
+                                     :show_y_title => true, 
+                                     :rotate_x_labels => true, })
 
 
 

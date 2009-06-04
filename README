@@ -4,6 +4,9 @@ This is a tiny CGI to generate charts of OpenOffice.org download
 counts. The data was based on bouncer logs uploaded by John McCreesh.
 e.g.) http://marketing.openoffice.org/bouncer/200905.csv
 
+This CGI is copyrighted free software by
+ Takashi Nakamoto <bluedwarf@bpost.plala.or.jp>
+
 ===== LICENSE =====
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,10 +21,19 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-This software includes SVG::Graph library in svg_graph_0.6.1
-directory, which is distributed under GNU General Public License.
-Please also see LICENSE.txt and GPL.txt in the direcotry for the
-detailed license claim of this library.
+This software includes SVG::Graph library in "svg_graph_0.6.1"
+directory, which is also distributed under GNU General Public
+License. Please also see LICENSE.txt and GPL.txt in the direcotry
+for the detailed license claim of this library.
+
+The SVG::Graph library in this source tree was improved upon to
+fit the purpose of this CGI. It contains some modifications made
+by the author of this CGI. This means that the author who makes some
+modifications on this library also holds copyright on the SVG::Graph
+library in this source tree. However, you are still allowed to
+redistribute it and/or modify it under the terms of the GNU General
+Public License as published by the Free Software Foundation, either
+version 3 of the License, or (at your option) any later version.
 
 ===== FILES =====
 
