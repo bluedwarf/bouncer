@@ -255,6 +255,7 @@ class ChartGenerator
       fields = []
       date = @start_date
       interval = ((@end_date - @start_date) / 20).round
+      interval = 1 if interval < 1
       while date <= @end_date
         if (date - @start_date) % interval == 0 
           fields << date.strftime("%y/%m/%d")
