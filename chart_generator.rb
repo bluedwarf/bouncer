@@ -170,7 +170,7 @@ class ChartGenerator
   # Fetching data from database.
   ###################################################
   def select(sql)
-    STDERR.puts sql # for debug purpose
+#    STDERR.puts sql # for debug purpose
     @db.execute(sql)
   end
 
