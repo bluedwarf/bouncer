@@ -73,8 +73,8 @@ version 3 of the License, or (at your option) any later version.
 
 ===== TODO =====
  --- IMPORTANT ---
- * Setting CGI and cron.
  * Write a document or a help to use this query form.
+ ** Instructions to display SVG for Internet Explorer users.
  * Writing more test cases.
 
  --- LATER ---

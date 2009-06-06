@@ -42,12 +42,44 @@ class ChartGenerator
     # Dates:
     #  This CGI generates a chart based on the data generated between
     #  these days.
-    @start_date = Date.new(@cgi['start_year'].to_i,
-                           @cgi['start_month'].to_i,
-                           @cgi['start_day'].to_i)
-    @end_date = Date.new(@cgi['end_year'].to_i,
-                         @cgi['end_month'].to_i,
-                         @cgi['end_day'].to_i)
+    res = @db.execute("SELECT MIN(datejd) FROM #{$tblname}")
+    first_date = Date.jd(res[0][0].to_i)
+
+    res = @db.execute("SELECT MAX(datejd) FROM #{$tblname}")
+    last_date = Date.jd(res[0][0].to_i)
+
+    case @cgi['period']
+    when 'this_year'
+      @start_date = Date.new(last_date.year, 1, 1)
+      @end_date = last_date
+    when 'this_month'
+      @start_date = Date.new(last_date.year, last_date.month, 1)
+      @end_date = last_date
+    when 'yesterday'
+      @start_date = @end_date = last_date
+    when 'specified_to_yesterday'
+      begin
+        @start_date = Date.new(@cgi['start_year1'].to_i,
+                               @cgi['start_month1'].to_i,
+                               @cgi['start_day1'].to_i)
+      rescue ArgumentError => exception
+        raise KnownException,
+        "Invalid date. Make sure the date you choose is correct and try again."
+      end
+      @end_date = last_date
+    when 'specified'
+      begin
+        @start_date = Date.new(@cgi['start_year2'].to_i,
+                               @cgi['start_month2'].to_i,
+                               @cgi['start_day2'].to_i)
+        @end_date = Date.new(@cgi['end_year'].to_i,
+                             @cgi['end_month'].to_i,
+                             @cgi['end_day'].to_i)
+      rescue ArgumentError => exception
+        raise KnownException,
+        "Invalid date. Make sure the date you choose is correct and try again."
+      end
+    end
 
     if @start_date > @end_date
       tmp = @start_date
@@ -55,18 +87,12 @@ class ChartGenerator
       @end_date = tmp
     end
 
-    res = @db.execute("SELECT MIN(datejd) FROM #{$tblname}")
-    first_date = Date.jd(res[0][0].to_i)
-
-    res = @db.execute("SELECT MAX(datejd) FROM #{$tblname}")
-    last_date = Date.jd(res[0][0].to_i)
-
     if @start_date < first_date
       raise KnownException,
-      "you specified the date before #{first_date.strftime('%Y-%m-%d')}."
+      "no download data was recoreded on the day you specified, #{@start_date.strftime('%d %b %Y')}. Download data has been recorded since #{first_date.strftime('%d %b %Y')}."
     elsif @end_date > last_date
       raise KnownException,
-      "you specified the date after #{last_date.strftime('%Y-%m-%d')}."
+      "no download data was recoreded on the day you specified, #{@end_date.strftime('%d %b %Y')}. The last date when the latest download log was updated was #{last_date.strftime('%d %b %Y')}."
     end
 
     # Products:
@@ -236,7 +262,7 @@ class ChartGenerator
       end
 
       if fields.size == 0
-        raise KnownException, "No download data in the condition you specified."
+        raise KnownException, "No download was recorded in the condition you specified."
       end
 
       # Generate SVG chart

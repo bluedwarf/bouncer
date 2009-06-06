@@ -157,16 +157,38 @@ else
         cgi.h1 { "OpenOffice.org Bouncer statistics: Query for chart" } +
         cgi.form('METHOD'=>'GET', 'ACTION'=>'chart.rb') {
           cgi.p {
-            "From: " +
-            cgi.scrolling_list({"NAME" => "start_day",
-                                 "VALUES" => start_days}) +
-            cgi.scrolling_list({"NAME" => "start_month",
-                                 "VALUES" => start_months}) +
-            cgi.scrolling_list({"NAME" => "start_year",
-                                 "VALUES" => start_years})
+            "<B>Chart type: </B>" +
+            cgi.scrolling_list({"NAME" => "type",
+                                 "VALUES" => type_values})
           } +
           cgi.p {
-            "To: " +
+            "<B>Period: </B><BR>" +
+            cgi.radio_button("period", "this_year", true) +
+            "This year (#{end_date.strftime('%Y')}) <BR>" +
+
+            cgi.radio_button("period", "this_month") +
+            "This month (#{end_date.strftime('%b %Y')}) <BR>" +
+
+            cgi.radio_button("period", "yesterday") +
+            "Yesterday (#{end_date.strftime('%d %b %Y')}) <BR>" +
+
+            cgi.radio_button("period", "specified_to_yesterday") +
+            cgi.scrolling_list({"NAME" => "start_day1",
+                                 "VALUES" => start_days}) +
+            cgi.scrolling_list({"NAME" => "start_month1",
+                                 "VALUES" => start_months}) +
+            cgi.scrolling_list({"NAME" => "start_year1",
+                                 "VALUES" => start_years}) +
+            "- Yesterday (#{end_date.strftime('%d %b %Y')}) <BR>" +
+            
+            cgi.radio_button("period", "specified") +
+            cgi.scrolling_list({"NAME" => "start_day2",
+                                 "VALUES" => start_days}) +
+            cgi.scrolling_list({"NAME" => "start_month2",
+                                 "VALUES" => start_months}) +
+            cgi.scrolling_list({"NAME" => "start_year2",
+                                 "VALUES" => start_years}) +
+            " - " +
             cgi.scrolling_list({"NAME" => "end_day",
                                  "VALUES" => end_days}) +
             cgi.scrolling_list({"NAME" => "end_month",
@@ -178,7 +200,7 @@ else
           } +
           cgi.table {
             cgi.tr {
-              cgi.th {"Product:"} + cgi.th {"Language:"} + cgi.th {"OS: "}
+              cgi.th {"Product (*):"} + cgi.th {"Language (*):"} + cgi.th {"OS (*): "}
             } +
             cgi.tr {
               cgi.td {
@@ -201,13 +223,11 @@ else
               }
             }
           } +
-          cgi.p {
-            "Chart type: " +
-            cgi.scrolling_list({"NAME" => "type",
-                                 "VALUES" => type_values})
-          } +
           cgi.p { 
             cgi.submit("Show")
+          } +
+          cgi.p {
+            "(*) Leave nothing selected to cover all elements listed."
           }
         }       
       }
