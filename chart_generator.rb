@@ -79,6 +79,9 @@ class ChartGenerator
         raise KnownException,
         "Invalid date. Make sure the date you choose is correct and try again."
       end
+    else
+      raise KnownException,
+      "Invalid period. Make sure the period you choose is correct and try again."
     end
 
     if @start_date > @end_date

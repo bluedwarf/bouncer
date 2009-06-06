@@ -153,8 +153,8 @@ else
   cgi.out('charset'=>$charset) {
     html = cgi.html { 
       cgi.head { cgi.title{'OpenOffice.org Bouncer statistics'} } +
-      cgi.body { 
-        cgi.h1 { "OpenOffice.org Bouncer statistics: Query for chart" } +
+      cgi.body {
+        cgi.h1 { "<SMALL>OpenOffice.org Bouncer statistics:</SMALL><BR> Query for chart" } +
         cgi.form('METHOD'=>'GET', 'ACTION'=>'chart.rb') {
           cgi.p {
             "<B>Chart type: </B>" +
