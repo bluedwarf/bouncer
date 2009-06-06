@@ -149,94 +149,64 @@ else
   ###################################################
   # Printing query form.
   ###################################################
+  f = open("query_chart.html") # Read the template
+  str = f.gets(nil)
+  f.close
+
   cgi = CGI.new("html4")
   cgi.out('charset'=>$charset) {
-    html = cgi.html { 
-      cgi.head { cgi.title{'OpenOffice.org Bouncer statistics'} } +
-      cgi.body {
-        cgi.h1 { "<SMALL>OpenOffice.org Bouncer statistics:</SMALL><BR> Query for chart" } +
-        cgi.form('METHOD'=>'GET', 'ACTION'=>'chart.rb') {
-          cgi.p {
-            "<B>Chart type: </B>" +
-            cgi.scrolling_list({"NAME" => "type",
-                                 "VALUES" => type_values})
-          } +
-          cgi.p {
-            "<B>Period: </B><BR>" +
-            cgi.radio_button("period", "this_year", true) +
-            "This year (#{end_date.strftime('%Y')}) <BR>" +
+    str.gsub!('<SELECT NAME="type"><!-- REPLACE SELECT_TYPE --></SELECT>',
+             cgi.scrolling_list({ "NAME" => "type",
+                                  "VALUES" => type_values}))
+    str.gsub!('<!-- REPLACE THIS_YEAR -->', end_date.strftime('%Y'))
+    str.gsub!('<!-- REPLACE THIS_MONTH -->', end_date.strftime('%b %Y'))
+    str.gsub!('<!-- REPLACE YESTERDAY -->', end_date.strftime('%d %b %Y'))
+    str.gsub!('<SELECT NAME="start_day1"><!-- REPLACE START_DAY --></SELECT>',
+              cgi.scrolling_list( {"NAME" => "start_day1",
+                                   "VALUES" => start_days}))
+    str.gsub!('<SELECT NAME="start_month1"><!-- REPLACE START_MONTH --></SELECT>',
+              cgi.scrolling_list({ "NAME" => "start_month1",
+                                   "VALUES" => start_months}))
+    str.gsub!('<SELECT NAME="start_year1"><!-- REPLACE START_YEAR --></SELECT>',
+              cgi.scrolling_list({ "NAME" => "start_year1",
+                                   "VALUES" => start_years}))
+    str.gsub!('<SELECT NAME="start_day2"><!-- REPLACE START_DAY --></SELECT>',
+              cgi.scrolling_list( {"NAME" => "start_day2",
+                                   "VALUES" => start_days}))
+    str.gsub!('<SELECT NAME="start_month2"><!-- REPLACE START_MONTH --></SELECT>',
+              cgi.scrolling_list({ "NAME" => "start_month2",
+                                   "VALUES" => start_months}))
+    str.gsub!('<SELECT NAME="start_year2"><!-- REPLACE START_YEAR --></SELECT>',
+              cgi.scrolling_list({ "NAME" => "start_year2",
+                                   "VALUES" => start_years}))
+    str.gsub!('<SELECT NAME="end_day"><!-- REPLACE END_DAY --></SELECT>',
+              cgi.scrolling_list( {"NAME" => "end_day",
+                                   "VALUES" => end_days}))
+    str.gsub!('<SELECT NAME="end_month"><!-- REPLACE END_MONTH --></SELECT>',
+              cgi.scrolling_list({ "NAME" => "end_month",
+                                   "VALUES" => end_months}))
+    str.gsub!('<SELECT NAME="end_year"><!-- REPLACE END_YEAR --></SELECT>',
+              cgi.scrolling_list({ "NAME" => "end_year",
+                                   "VALUES" => end_years}))
+    str.gsub!('<SELECT NAME="product" SIZE="10" MULTIPLE><!-- REPLACE PRODUCTS --></SELECT>',
+              cgi.scrolling_list( {"NAME" => "product",
+                                   "VALUES" => products,
+                                   "SIZE" => 10,
+                                   "MULTIPLE" => true}))
 
-            cgi.radio_button("period", "this_month") +
-            "This month (#{end_date.strftime('%b %Y')}) <BR>" +
+    str.gsub!('<SELECT NAME="language" SIZE="10" MULTIPLE><!-- REPLACE LANGUAGES --></SELECT>',
+              cgi.scrolling_list( {"NAME" => "language",
+                                   "VALUES" => languages,
+                                   "SIZE" => 10,
+                                   "MULTIPLE" => true}))
 
-            cgi.radio_button("period", "yesterday") +
-            "Yesterday (#{end_date.strftime('%d %b %Y')}) <BR>" +
+    str.gsub!('<SELECT NAME="os" SIZE="10" MULTIPLE><!-- REPLACE OSES --></SELECT>',
+              cgi.scrolling_list( {"NAME" => "os",
+                                   "VALUES" => oses,
+                                   "SIZE" => 10,
+                                   "MULTIPLE" => true}))
 
-            cgi.radio_button("period", "specified_to_yesterday") +
-            cgi.scrolling_list({"NAME" => "start_day1",
-                                 "VALUES" => start_days}) +
-            cgi.scrolling_list({"NAME" => "start_month1",
-                                 "VALUES" => start_months}) +
-            cgi.scrolling_list({"NAME" => "start_year1",
-                                 "VALUES" => start_years}) +
-            "- Yesterday (#{end_date.strftime('%d %b %Y')}) <BR>" +
-            
-            cgi.radio_button("period", "specified") +
-            cgi.scrolling_list({"NAME" => "start_day2",
-                                 "VALUES" => start_days}) +
-            cgi.scrolling_list({"NAME" => "start_month2",
-                                 "VALUES" => start_months}) +
-            cgi.scrolling_list({"NAME" => "start_year2",
-                                 "VALUES" => start_years}) +
-            " - " +
-            cgi.scrolling_list({"NAME" => "end_day",
-                                 "VALUES" => end_days}) +
-            cgi.scrolling_list({"NAME" => "end_month",
-                                 "VALUES" => end_months}) +
-            cgi.scrolling_list({"NAME" => "end_year",
-                                 "VALUES" => end_years})
-          } +
-          cgi.p {
-          } +
-          cgi.table {
-            cgi.tr {
-              cgi.th {"Product (*):"} + cgi.th {"Language (*):"} + cgi.th {"OS (*): "}
-            } +
-            cgi.tr {
-              cgi.td {
-                cgi.scrolling_list({"NAME" => "product",
-                                     "VALUES" => products,
-                                     "SIZE" => 10,
-                                     "MULTIPLE" => true})
-              } +
-              cgi.td {
-                cgi.scrolling_list({"NAME" => "language",
-                                     "VALUES" => languages,
-                                     "SIZE" => 10,
-                                     "MULTIPLE" => true})
-              } +
-              cgi.td {
-                cgi.scrolling_list({"NAME" => "os",
-                                     "VALUES" => oses,
-                                     "SIZE" => 10,
-                                     "MULTIPLE" => true})
-              }
-            }
-          } +
-          cgi.p { 
-            cgi.submit("Show")
-          } +
-          cgi.p {
-            "(*) Leave nothing selected to cover all elements listed."
-          } +
-          cgi.p {
-            "(**) The chart will be provided in SVG format. If you want to view this chart with Internet Explorer, you need to install a plugin for viewing SVG such as <a href='http://www.adobe.com/svg/viewer/install/main.html'>Adobe SVG Viewer</a>."
-          }
-        }       
-      }
-    }
-
-    CGI.pretty(html)
+    str
   }
 ensure
   db.close if db
