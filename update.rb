@@ -27,25 +27,35 @@ sqls = []
 base_url = "http://marketing.openoffice.org/bouncer/"
 extension = ".csv"
 
-months = [Date.today, Date.today << 1]
-months.each{ |month|
+res = db.execute("SELECT MAX(datejd) FROM #{$tblname}")
+end_date = Date.jd(res[0][0].to_i) # the last date of registered data
+
+month = end_date
+while month.month <= Date.today.month
   url = base_url + month.strftime("%Y%m") + extension
 
   open(url){ |f|
     f.gets # header => discard
     f.each_line{ |line|
       date, product, os, language, downloads = line.chomp.split(",")
-      date_jd = Date.parse(date).jd
+      date = Date.parse(date)
+      date_jd = date.jd
 
-      sql = "SELECT * FROM #{$tblname} WHERE datejd=#{date_jd} AND product='#{product}' AND os='#{os}' AND language='#{language}'"
-      res = db.execute(sql)
+      if date == end_date
+        sql = "SELECT * FROM #{$tblname} WHERE datejd=#{date_jd} AND product='#{product}' AND os='#{os}' AND language='#{language}'"
+        res = db.execute(sql)
 
-      if res.empty?
-        sqls << "INSERT INTO #{$tblname} VALUES ('#{date_jd}', '#{product}', '#{os}', '#{language}', #{downloads.to_i})"
+        if res.empty?
+          sqls << "INSERT INTO #{$tblname} VALUES ('#{date_jd}', '#{product}', '#{os}', '#{language}', #{downloads.to_i})"
+        end
+      elsif date > end_date
+          sqls << "INSERT INTO #{$tblname} VALUES ('#{date_jd}', '#{product}', '#{os}', '#{language}', #{downloads.to_i})"
       end
     }
   }
-}
+
+  month = month >> 1
+end
 
 db.transaction{
   sqls.each{ |sql|
@@ -55,3 +65,4 @@ db.transaction{
 }
 
 db.close
+
