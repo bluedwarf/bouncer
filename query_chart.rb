@@ -228,6 +228,9 @@ else
           } +
           cgi.p {
             "(*) Leave nothing selected to cover all elements listed."
+          } +
+          cgi.p {
+            "(**) The chart will be provided in SVG format. If you want to view this chart with Internet Explorer, you need to install a plugin for viewing SVG such as <a href='http://www.adobe.com/svg/viewer/install/main.html'>Adobe SVG Viewer</a>."
           }
         }       
       }
