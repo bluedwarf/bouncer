@@ -76,6 +76,5 @@ version 3 of the License, or (at your option) any later version.
 
 ===== TODO =====
  * Writing more test cases.
- * Write a document or a help to use this query form.
- * Fancy query page.
  * Color themes (need hacks of SVG::Graph library).
+ ** Need different at least 40 colours.
