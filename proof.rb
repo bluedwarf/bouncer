@@ -42,7 +42,7 @@ months.each{ |month|
  
       if res.empty?
         sql = "INSERT INTO #{$tblname} VALUES ('#{date_jd}', '#{product}', '#{os}', '#{language}', #{downloads.to_i})"
-#        db.execute(sql)
+        db.execute(sql)
  
         puts "Registered: #{line}"
       end
