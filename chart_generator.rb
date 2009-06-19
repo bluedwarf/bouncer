@@ -374,11 +374,17 @@ class ChartGenerator
                                      :show_y_title => true, 
                                      :rotate_x_labels => true, })
 
-      # ToDo: sort this date in alphabetical order
-      lines.each{ |title,data|
-        graph.add_data({ :data => data,
+      if @type == "line_by_os"
+        titles = @osnames
+      else
+        titles = lines.keys.sort
+      end
+
+      titles.each{ |title|
+        graph.add_data({ :data => lines[title],
                          :title => title })
       }
+
       output << "Content-type: image/svg+xml\r\n\r\n"
       output << graph.burn()
     elsif @type == "bar"
