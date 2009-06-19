@@ -82,6 +82,10 @@ module SVG
 
         if scale_integers
           scale_division = scale_division < 1 ? 1 : scale_division.round
+
+          digit = scale_division.to_s.size
+          i = scale_division.to_s[0..0].to_i
+          scale_division = i*(10**(digit-1))
         end
 
         rv = []

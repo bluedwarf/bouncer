@@ -11,6 +11,7 @@ $name_types = ["Pie chart (by product)",
                "Line chart (by language)",
                "Line chart (by OS and architecture)",
                "Line chart (by OS)",
+               "Bar chart by month",
                "Download counter"]
 
 $valid_types = ["pie_by_product",
@@ -21,6 +22,7 @@ $valid_types = ["pie_by_product",
                 "line_by_language",
                 "line_by_oswa", # Line chart by OS with architecture name
                 "line_by_os", # Line chart by OS names like "Windows"
+                "bar",
                 "count"]
 
 require 'date'

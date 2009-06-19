@@ -187,6 +187,16 @@ class ChartGenerator
       sql += where_conds
       sql += "GROUP BY datejd, os "
       sql += "ORDER BY os, datejd ASC "
+    elsif @type == "bar"
+      sql += "SELECT datejd, Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY datejd "
+      sql += "ORDER BY datejd ASC "
+#    elsif @type == "bar_by_product"
+#      sql += "SELECT datejd, product, Sum(downloads) FROM #{@tbl} "
+#      sql += where_conds
+#      sql += "GROUP BY datejd, product "
+#      sql += "ORDER BY product, datejd ASC "
     elsif @type == "count"
       sql += "SELECT Sum(downloads) as 'count' FROM #{@tbl} "
       sql += where_conds
@@ -353,6 +363,39 @@ class ChartGenerator
         graph.add_data({ :data => data,
                          :title => title })
       }
+      output << "Content-type: image/svg+xml\r\n\r\n"
+      output << graph.burn()
+    elsif @type == "bar"
+      fields = []
+      values = []
+
+      date = Date.jd(res[0][0].to_i)
+      count = 0
+
+      res.each{ |r|
+        if date.month != Date.jd(r[0].to_i).month
+          fields << date.strftime("%b %Y")
+          values << count
+
+          date = Date.jd(r[0].to_i)
+          count = 0
+        end
+
+        count += r[1].to_i
+      }
+
+      fields << date.strftime("%b %Y")
+      values << count
+
+      require 'SVG/Graph/Bar'
+      graph = SVG::Graph::Bar.new({ :height => 500,
+                                    :width => 900,
+                                    :scale_integers => true,
+                                    :stack => :side,
+                                    :fields => fields, })
+
+      graph.add_data(:data => values, :title => 'D/L')
+
       output << "Content-type: image/svg+xml\r\n\r\n"
       output << graph.burn()
     else
