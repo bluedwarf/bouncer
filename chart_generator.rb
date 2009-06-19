@@ -32,6 +32,19 @@ class ChartGenerator
     @tbl = tblname
     @cgi = CGI.new("html4")
 
+    # create OS grouping rule
+    @osnames = ["Windows", "Linux", "Mac OS X", "Solaris", "Others"]
+    cases = ["win%", "linux%", "macosx%", "solaris%"]
+
+    @osname_case = "CASE "
+    cases.each_index{ |i|
+      case_str = cases[i]
+      osname = @osnames[i]
+      
+      @osname_case += "WHEN os LIKE '#{case_str}' THEN '#{osname}' "
+    }
+    @osname_case += "ELSE '#{@osnames[-1]}' END "
+
     check_argument
   end
 
@@ -167,11 +180,18 @@ class ChartGenerator
       sql += where_conds
       sql += "GROUP BY language "
       sql += "ORDER BY language "
-    elsif @type == "pie_by_oswa" || @type == "pie_by_os"
+    elsif @type == "pie_by_oswa"
       sql += "SELECT os, Sum(downloads) AS 'count' FROM #{@tbl} "
       sql += where_conds
       sql += "GROUP BY os "
       sql += "ORDER BY os "
+    elsif @type == "pie_by_os"
+      sql = "SELECT #{@osname_case} AS osname, "
+      sql += "Sum(downloads) AS 'count' "
+      sql += "FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY osname "
+      sql += "ORDER BY osname "
     elsif @type == "line_by_product"
       sql += "SELECT datejd, product, Sum(downloads) FROM #{@tbl} "
       sql += where_conds
@@ -237,45 +257,30 @@ class ChartGenerator
       fields = []
       values = []
 
-      if @type == "pie_by_os" # Special manipulation for this type of chart.
-        # Group by OS name
-        h = {}
-        res.each{ |r|
-          case r[0]
-          when /^win/
-            h["Windows"] = 0 unless h["Windows"]
-            h["Windows"] += r[1].to_i
-          when /^linux/
-            h["Linux"] = 0 unless h["Linux"]
-            h["Linux"] += r[1].to_i
-          when /^macosx/
-            h["Mac OS X"] = 0 unless h["Mac OS X"]
-            h["Mac OS X"] += r[1].to_i
-          when /^solaris/
-            h["Solaris"] = 0 unless h["Solaris"]
-            h["Solaris"] += r[1].to_i
-          else
-            h["Others"] = 0 unless h["Others"]
-            h["Others"] += r[1].to_i
-          end
-        }
-
-        # Show the chart in this order.
-        ["Windows", "Linux", "Mac OS X", "Solaris", "Others"].each{ |os_name|
-          if h[os_name]
-            fields << os_name
-            values << h[os_name]
-          end
-        }
-      else
-        res.each{ |r|
-          fields << r[0]
-          values << r[1].to_i
-        }
-      end
+      res.each{ |r|
+        fields << r[0]
+        values << r[1].to_i
+      }
 
       if fields.size == 0
         raise KnownException, "No download was recorded in the condition you specified."
+      end
+
+      # Reorder in the order of @osnames
+      if @type == "pie_by_os"
+        new_fields = []
+        new_values = []
+
+        @osnames.each{ |osname|
+          i = fields.index(osname)
+          if i != nil
+            new_fields << fields[i]
+            new_values << values[i]
+          end
+        }
+
+        fields = new_fields
+        values = new_values
       end
 
       # Generate SVG chart
