@@ -32,20 +32,52 @@ class ChartGenerator
     @tbl = tblname
     @cgi = CGI.new("html4")
 
-    # create OS grouping rule
-    @osnames = ["Windows", "Linux", "Mac OS X", "Solaris", "Others"]
-    cases = ["win%", "linux%", "macosx%", "solaris%"]
-
-    @osname_case = "CASE "
-    cases.each_index{ |i|
-      case_str = cases[i]
-      osname = @osnames[i]
-      
-      @osname_case += "WHEN os LIKE '#{case_str}' THEN '#{osname}' "
-    }
-    @osname_case += "ELSE '#{@osnames[-1]}' END "
-
     check_argument
+
+    # create OS grouping rule
+    if @type =~ /by_os$/
+      @osnames = ["Windows", "Linux", "Mac OS X", "Solaris", "Others"]
+      cases = ["win%", "linux%", "macosx%", "solaris%"]
+
+      @osname_case = "CASE "
+      cases.each_index{ |i|
+        case_str = cases[i]
+        osname = @osnames[i]
+        
+        @osname_case += "WHEN os LIKE '#{case_str}' THEN '#{osname}' "
+      }
+      @osname_case += "ELSE '#{@osnames[-1]}' END "
+    end
+
+    # carete month grouping rule
+    if @type == "bar"
+      periods = []
+      date = @start_date
+      while date <= @end_date
+        first_date = date
+        next_month = first_date >> 1
+        date = Date.new(next_month.year, next_month.month, 1)
+        last_date = date - 1
+        if  first_date.year == @end_date.year &&
+            first_date.month == @end_date.month
+          last_date = @end_date
+        end
+
+        periods << [first_date, last_date, first_date.strftime("%Y-%m")]
+      end
+
+      @month_case = "CASE "
+      periods.each{ |a|
+        first_date = a[0]
+        last_date = a[1]
+        month_name = a[2]
+
+        @month_case += "WHEN datejd>=#{first_date.jd} AND "
+        @month_case += "datejd<=#{last_date.jd} "
+        @month_case += "THEN '#{month_name}' "
+      }
+      @month_case += "END "
+    end
   end
 
   ###################################################
@@ -215,10 +247,12 @@ class ChartGenerator
       sql += "GROUP BY datejd, osname "
       sql += "ORDER BY osname, datejd ASC "
     elsif @type == "bar"
-      sql += "SELECT datejd, Sum(downloads) FROM #{@tbl} "
+      sql += "SELECT "
+      sql += "#{@month_case} AS month, "
+      sql += "Sum(downloads) FROM #{@tbl} "
       sql += where_conds
-      sql += "GROUP BY datejd "
-      sql += "ORDER BY datejd ASC "
+      sql += "GROUP BY month "
+      sql += "ORDER BY month ASC "
     elsif @type == "count"
       sql += "SELECT Sum(downloads) as 'count' FROM #{@tbl} "
       sql += where_conds
@@ -340,6 +374,7 @@ class ChartGenerator
                                      :show_y_title => true, 
                                      :rotate_x_labels => true, })
 
+      # ToDo: sort this date in alphabetical order
       lines.each{ |title,data|
         graph.add_data({ :data => data,
                          :title => title })
@@ -350,23 +385,10 @@ class ChartGenerator
       fields = []
       values = []
 
-      date = Date.jd(res[0][0].to_i)
-      count = 0
-
       res.each{ |r|
-        if date.month != Date.jd(r[0].to_i).month
-          fields << date.strftime("%b %Y")
-          values << count
-
-          date = Date.jd(r[0].to_i)
-          count = 0
-        end
-
-        count += r[1].to_i
+        fields << Date.strptime(r[0], "%Y-%m").strftime("%b %Y")
+        values << r[1].to_i
       }
-
-      fields << date.strftime("%b %Y")
-      values << count
 
       require 'SVG/Graph/Bar'
       graph = SVG::Graph::Bar.new({ :height => 500,
