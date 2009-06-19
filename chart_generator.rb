@@ -202,21 +202,23 @@ class ChartGenerator
       sql += where_conds
       sql += "GROUP BY datejd, language "
       sql += "ORDER BY language, datejd ASC "
-    elsif @type == "line_by_oswa" || @type == "line_by_os"
+    elsif @type == "line_by_oswa"
       sql += "SELECT datejd, os, Sum(downloads) FROM #{@tbl} "
       sql += where_conds
       sql += "GROUP BY datejd, os "
       sql += "ORDER BY os, datejd ASC "
+    elsif @type == "line_by_os"
+      sql += "SELECT datejd, "
+      sql += "#{@osname_case} AS osname, "
+      sql += "Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY datejd, osname "
+      sql += "ORDER BY osname, datejd ASC "
     elsif @type == "bar"
       sql += "SELECT datejd, Sum(downloads) FROM #{@tbl} "
       sql += where_conds
       sql += "GROUP BY datejd "
       sql += "ORDER BY datejd ASC "
-#    elsif @type == "bar_by_product"
-#      sql += "SELECT datejd, product, Sum(downloads) FROM #{@tbl} "
-#      sql += where_conds
-#      sql += "GROUP BY datejd, product "
-#      sql += "ORDER BY product, datejd ASC "
     elsif @type == "count"
       sql += "SELECT Sum(downloads) as 'count' FROM #{@tbl} "
       sql += where_conds
@@ -311,39 +313,13 @@ class ChartGenerator
 
       # set data
       lines = {}
+      res.each{ |r|
+        lines[r[1]] = Array.new(fields.size, 0) if lines[r[1]] == nil
 
-      if @type == "line_by_os"
-        res.each{ |r|
-          date = Date.jd(r[0].to_i)
-          i = date - @start_date
-
-          case r[1]
-          when /^win/
-            lines["Windows"] = Array.new(fields.size, 0) unless lines["Windows"]
-            lines["Windows"][i] += r[2].to_i
-          when /^linux/
-            lines["Linux"] = Array.new(fields.size, 0) unless lines["Linux"]
-            lines["Linux"][i] += r[2].to_i
-          when /^macosx/
-            lines["Mac OS X"] = Array.new(fields.size, 0) unless lines["Mac OS X"]
-            lines["Mac OS X"][i] += r[2].to_i
-          when /^solaris/
-            lines["Solaris"] = Array.new(fields.size, 0) unless lines["Solaris"]
-            lines["Solaris"][i] += r[2].to_i
-          else
-            lines["Others"] = Array.new(fields.size, 0) unless lines["Others"]
-            lines["Others"][i] += r[2].to_i
-          end
-        }
-      else
-        res.each{ |r|
-          lines[r[1]] = Array.new(fields.size, 0) if lines[r[1]] == nil
-
-          date = Date.jd(r[0].to_i)
-          i = date - @start_date
-          lines[r[1]][i] = r[2].to_i
-        }
-      end
+        date = Date.jd(r[0].to_i)
+        i = date - @start_date
+        lines[r[1]][i] = r[2].to_i
+      }
 
       if lines.size == 0
         raise KnownException, "No download data in the condition you specified."
