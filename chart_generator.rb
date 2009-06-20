@@ -50,8 +50,8 @@ class ChartGenerator
     end
 
     # carete month grouping rule
-    if @type == "bar"
-      periods = []
+    if @type =~ /^bar/
+      @periods = []
       date = @start_date
       while date <= @end_date
         first_date = date
@@ -63,14 +63,14 @@ class ChartGenerator
           last_date = @end_date
         end
 
-        periods << [first_date, last_date, first_date.strftime("%Y-%m")]
+        @periods << [first_date, last_date, first_date.strftime("%Y-%m")]
       end
 
       @month_case = "CASE "
-      periods.each{ |a|
+      @periods.each{ |a|
         first_date = a[0]
         last_date = a[1]
-        month_name = a[2]
+        month_name = a[2] # month_name "%Y-%m"
 
         @month_case += "WHEN datejd>=#{first_date.jd} AND "
         @month_case += "datejd<=#{last_date.jd} "
@@ -253,6 +253,38 @@ class ChartGenerator
       sql += where_conds
       sql += "GROUP BY month "
       sql += "ORDER BY month ASC "
+    elsif @type == "bar_by_product"
+      sql += "SELECT "
+      sql += "#{@month_case} AS month, "
+      sql += "product, "
+      sql += "Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY month, product "
+      sql += "ORDER BY product ASC, month ASC "
+    elsif @type == "bar_by_language"
+      sql += "SELECT "
+      sql += "#{@month_case} AS month, "
+      sql += "language, "
+      sql += "Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY month, language "
+      sql += "ORDER BY language ASC, month ASC "
+    elsif @type == "bar_by_oswa"
+      sql += "SELECT "
+      sql += "#{@month_case} AS month, "
+      sql += "os, "
+      sql += "Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY month, os "
+      sql += "ORDER BY os ASC, month ASC "
+    elsif @type == "bar_by_os"
+      sql += "SELECT "
+      sql += "#{@month_case} AS month, "
+      sql += "#{@osname_case} AS osname, "
+      sql += "Sum(downloads) FROM #{@tbl} "
+      sql += where_conds
+      sql += "GROUP BY month, osname "
+      sql += "ORDER BY osname ASC, month ASC "
     elsif @type == "count"
       sql += "SELECT Sum(downloads) as 'count' FROM #{@tbl} "
       sql += where_conds
@@ -404,6 +436,41 @@ class ChartGenerator
                                     :fields => fields, })
 
       graph.add_data(:data => values, :title => 'D/L')
+
+      output << "Content-type: image/svg+xml\r\n\r\n"
+      output << graph.burn()
+    elsif @type =~ /^bar/
+      fields = []
+      @periods.each{ |a| fields << a[2] } # month_name "%Y-%m"
+
+      value_set = {}
+      res.each{ |r|
+        value_set[r[1]] = Array.new(fields.size, 0) if value_set[r[1]] == nil
+
+        i = fields.index(r[0])
+        value_set[r[1]][i] = r[2].to_i
+      }
+
+      # Replace month description with "%b %Y"
+      fields.map!{ |f| Date.strptime(f, "%Y-%m").strftime("%b %Y") }
+
+      require 'SVG/Graph/Bar'
+      graph = SVG::Graph::Bar.new({ :height => 500,
+                                    :width => 900,
+                                    :scale_integers => true,
+                                    :stack => :side,
+                                    :fields => fields, })
+
+      if @type == "bar_by_os"
+        titles = @osnames
+      else
+        titles = value_set.keys.sort
+      end
+
+      titles.each{ |title|
+        graph.add_data( :data => value_set[title],
+                        :title => title)
+      }
 
       output << "Content-type: image/svg+xml\r\n\r\n"
       output << graph.burn()
