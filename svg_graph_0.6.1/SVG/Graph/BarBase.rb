@@ -60,17 +60,34 @@ module SVG
       def get_css
         css = ""
 
-        color_set = [[0, 69, 134],
-                     [255, 66, 14],
-                     [255, 211, 32],
-                     [87, 157, 28],
-                     [126, 0, 33],
-                     [131, 202, 255],
-                     [49, 64, 4],
-                     [174, 207, 0],
-                     [75, 31, 111],
-                     [255, 149, 14],
-                     [197, 0, 11]] # in RGB
+        color_set_base = [[0, 69, 134],
+                          [255, 66, 14],
+                          [255, 211, 32],
+                          [87, 157, 28],
+                          [126, 0, 33],
+                          [131, 202, 255],
+                          [49, 64, 4],
+                          [174, 207, 0],
+                          [75, 31, 111],
+                          [255, 149, 14],
+                          [197, 0, 11]] # in RGB
+        color_set = color_set_base.clone
+
+        # light colours
+        color_set_base.each{ |c|
+          color_set << c.map{|e|
+            if e*3/2 > 255
+              255
+            else
+              e*3/2
+            end
+          }
+        }
+
+        # dark colours
+        color_set_base.each{ |c|
+          color_set << c.map{|e| e/2}
+        }
 
         @data.each_index{ |i|
           j = i % color_set.size

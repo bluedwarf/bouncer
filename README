@@ -77,6 +77,3 @@ version 3 of the License, or (at your option) any later version.
 ===== TODO =====
  * Writing more test cases.
  * Color themes (need hacks of SVG::Graph library).
- ** Need different at least 40 colours.
-
-
