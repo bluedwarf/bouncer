@@ -413,8 +413,10 @@ class ChartGenerator
       end
 
       titles.each{ |title|
-        graph.add_data({ :data => lines[title],
-                         :title => title })
+        if lines[title]
+          graph.add_data({ :data => lines[title],
+                           :title => title })
+        end
       }
 
       output << "Content-type: image/svg+xml\r\n\r\n"
@@ -468,8 +470,10 @@ class ChartGenerator
       end
 
       titles.each{ |title|
-        graph.add_data( :data => value_set[title],
-                        :title => title)
+        if value_set[title]
+          graph.add_data( :data => value_set[title],
+                          :title => title)
+        end
       }
 
       output << "Content-type: image/svg+xml\r\n\r\n"
