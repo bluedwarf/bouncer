@@ -58,64 +58,40 @@ module SVG
       end
 
       def get_css
-        return <<EOL
-/* default fill styles for multiple datasets (probably only use a single dataset on this graph though) */
-.key1,.fill1{
-	fill: #004586;
-	stroke: none;
-	stroke-width: 0.5px;	
-}
-.key2,.fill2{
-	fill: #ff420e;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key3,.fill3{
-	fill: #ffd320;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key4,.fill4{
-	fill: #579d1c;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key5,.fill5{
-	fill: #7e0021;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key6,.fill6{
-	fill: #83caff;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key7,.fill7{
-	fill: #314004;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key8,.fill8{
-	fill: #aecf00;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key9,.fill9{
-	fill: #4b1f6f;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key10,.fill10{
-	fill: #ff950e;
-	stroke: none;
-	stroke-width: 1px;	
-}
-.key11,.fill11{
-	fill: #c5000b;
+        css = ""
+
+        color_set = [[0, 69, 134],
+                     [255, 66, 14],
+                     [255, 211, 32],
+                     [87, 157, 28],
+                     [126, 0, 33],
+                     [131, 202, 255],
+                     [49, 64, 4],
+                     [174, 207, 0],
+                     [75, 31, 111],
+                     [255, 149, 14],
+                     [197, 0, 11]] # in RGB
+
+        @data.each_index{ |i|
+          j = i % color_set.size
+          r = color_set[j][0].to_s(16)
+          g = color_set[j][1].to_s(16)
+          b = color_set[j][2].to_s(16)
+
+          r = "0" + r if r.size == 1
+          g = "0" + g if g.size == 1
+          b = "0" + b if b.size == 1
+
+          css << <<EOL
+.key#{i+1},.fill#{i+1}{
+	fill: \##{r}#{g}#{b};
 	stroke: none;
 	stroke-width: 1px;	
 }
 EOL
+        }
+
+        return css
       end
     end
   end
