@@ -459,7 +459,13 @@ class ChartGenerator
       }
 
       # Replace month description with "%b %Y"
-      fields.map!{ |f| Date.strptime(f, "%Y-%m").strftime("%b %Y") }
+      fields.map!{ |f|
+        if f =~ /(\d{4})\-(\d{2})/
+          Date.new($1.to_i, $2.to_i, 1).strftime("%b %Y")
+        else
+          raise "Unknown problem occured while creating month expression."
+        end
+      }
 
       require 'SVG/Graph/Bar'
       graph = SVG::Graph::Bar.new({ :height => 500,
