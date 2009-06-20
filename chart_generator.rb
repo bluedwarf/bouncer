@@ -431,7 +431,12 @@ class ChartGenerator
       values = []
 
       res.each{ |r|
-        fields << Date.strptime(r[0], "%Y-%m").strftime("%b %Y")
+        if r[0] =~ /(\d{4})\-(\d{2})/
+          fields << Date.new($1.to_i, $2.to_i, 1).strftime("%b %Y")
+        else
+          raise "Unknown problem occured while creating month expression."
+        end
+
         values << r[1].to_i
       }
 
