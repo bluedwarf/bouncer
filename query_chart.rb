@@ -188,6 +188,9 @@ else
     str.gsub!('<SELECT NAME="end_year"><!-- REPLACE END_YEAR --></SELECT>',
               cgi.scrolling_list({ "NAME" => "end_year",
                                    "VALUES" => end_years}))
+    str.gsub!('<SELECT NAME="months"><!-- REPLACE MONTHS --></SELECT>',
+              cgi.scrolling_list({ "NAME" => "months",
+                                   "VALUES" => (1..12).to_a.map{|f| f.to_s} } ))
     str.gsub!('<SELECT NAME="product" SIZE="10" MULTIPLE><!-- REPLACE PRODUCTS --></SELECT>',
               cgi.scrolling_list( {"NAME" => "product",
                                    "VALUES" => products,
@@ -205,7 +208,6 @@ else
                                    "VALUES" => oses,
                                    "SIZE" => 10,
                                    "MULTIPLE" => true}))
-
     str
   }
 ensure

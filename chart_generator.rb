@@ -124,6 +124,11 @@ class ChartGenerator
         raise KnownException,
         "Invalid date. Make sure the date you choose is correct and try again."
       end
+    when 'last_months'
+      months = @cgi['months'].to_i
+      @end_date = last_date
+      @start_date = last_date << (months - 1)
+      @start_date = Date.new(@start_date.year, @start_date.month, 1)
     else
       raise KnownException,
       "Invalid period. Make sure the period you choose is correct and try again."

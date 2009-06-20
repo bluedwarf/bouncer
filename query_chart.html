@@ -36,15 +36,18 @@ select {font-size: 12px;}
         <INPUT NAME="period" TYPE="radio" VALUE="this_month">
         This month (<!-- REPLACE THIS_MONTH -->) 
         <BR>
+
         <INPUT NAME="period" TYPE="radio" VALUE="yesterday">
         Yesterday (<!-- REPLACE YESTERDAY -->)
         <BR>
+
         <INPUT NAME="period" TYPE="radio" VALUE="specified_to_yesterday">
         <SELECT NAME="start_day1"><!-- REPLACE START_DAY --></SELECT>
         <SELECT NAME="start_month1"><!-- REPLACE START_MONTH --></SELECT>
         <SELECT NAME="start_year1"><!-- REPLACE START_YEAR --></SELECT>
         - Yesterday (<!-- REPLACE YESTERDAY -->) 
         <BR>
+
         <INPUT NAME="period" TYPE="radio" VALUE="specified">
         <SELECT NAME="start_day2"><!-- REPLACE START_DAY --></SELECT>
         <SELECT NAME="start_month2"><!-- REPLACE START_MONTH --></SELECT>
@@ -53,6 +56,11 @@ select {font-size: 12px;}
         <SELECT NAME="end_day"><!-- REPLACE END_DAY --></SELECT>
         <SELECT NAME="end_month"><!-- REPLACE END_MONTH --></SELECT>
         <SELECT NAME="end_year"><!-- REPLACE END_YEAR --></SELECT>
+	<BR>
+
+        <INPUT NAME="period" TYPE="radio" VALUE="last_months">
+	Last <SELECT NAME="months"><!-- REPLACE MONTHS --></SELECT> months.
+	<BR>
       </P>
       <P>
       </P>
@@ -90,7 +98,7 @@ select {font-size: 12px;}
       (*) Leave nothing selected to cover all elements listed.
     </P>
     <P>
-      (**) The chart will be provided in SVG format. If you want to view this chart with <B>Internet Explorer</B>, you need to install a plugin for viewing SVG such as <a href='http://www.adobe.com/svg/viewer/install/main.html'>Adobe SVG Viewer</a>.
+      (**) Charts will be provided in SVG format. If you want to view this chart with <B>Internet Explorer</B>, you need to install a plugin for viewing SVG such as <a href='http://www.adobe.com/svg/viewer/install/main.html'>Adobe SVG Viewer</a>.
     </P>
 
     <HR>
