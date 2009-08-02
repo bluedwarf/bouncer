@@ -54,6 +54,12 @@ rescue => exception # for unknown exception
           "This CGI crashed for some reason. Please send the following error message to #$contact:"
         } +
         cgi.h2 {
+          "Query:"
+        } +
+        cgi.p {
+          cgi.query_string
+        } +
+        cgi.h2 {
           "Error message:"
         } +
         cgi.p {
