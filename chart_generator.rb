@@ -393,7 +393,7 @@ class ChartGenerator
       }
 
       if lines.size == 0
-        raise KnownException, "No download data in the condition you specified."
+        raise KnownException, "No download data was recorded in the condition you specified. Please try another query."
       end
 
       require 'SVG/Graph/Line'
@@ -462,6 +462,10 @@ class ChartGenerator
         i = fields.index(r[0])
         value_set[r[1]][i] = r[2].to_i
       }
+
+      if value_set.size == 0
+        raise KnownException, "No download data was recorded in the condition you specified. Please try another query."
+      end
 
       # Replace month description with "%b %Y"
       fields.map!{ |f|
